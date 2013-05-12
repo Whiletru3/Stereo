@@ -63,26 +63,35 @@ void set_container_image(BmpContainer *bmp_container, const int resource_id,
 const int XS[] = {76, 112};
 const int YS[] = {18, 100};
 
-void set_time(unsigned short display_hour, unsigned short display_min) {
+void set_time(unsigned short display_hour, unsigned short display_min, bool bInit) {
   // hours
-  set_container_image(
-    &time_digits_images[0],
-    RESOURCE_ID_NUMERAL[display_hour/10],
-    GPoint(XS[0], YS[0]));
-  set_container_image(
-    &time_digits_images[1],
-    RESOURCE_ID_NUMERAL[(display_hour%10)+10], // + 10 to catch the right ressources
-    GPoint(XS[1], YS[0]));
-
+	if(bInit || (display_min == 0 && display_hour%10 == 0))
+		{
+		set_container_image(
+			&time_digits_images[0],
+   	 		RESOURCE_ID_NUMERAL[display_hour/10],
+    		GPoint(XS[0], YS[0]));
+		}
+	if(bInit || (display_min == 0))
+		{	
+		set_container_image(
+			&time_digits_images[1],
+			RESOURCE_ID_NUMERAL[(display_hour%10)+10], // + 10 to catch the right ressources
+			GPoint(XS[1], YS[0]));
+		}
   // minutes
-  set_container_image(
-    &time_digits_images[2],
-    RESOURCE_ID_NUMERAL[display_min/10],
-    GPoint(XS[0], YS[1]));
-  set_container_image(
-    &time_digits_images[3],
-    RESOURCE_ID_NUMERAL[(display_min%10)+10], // + 10 to catch the right ressources
-    GPoint(XS[1], YS[1]));
+	if(bInit || (display_min%10 == 0))
+		{
+		set_container_image(
+			&time_digits_images[2],
+			RESOURCE_ID_NUMERAL[display_min/10],
+			GPoint(XS[0], YS[1]));
+		}
+	// updated every time		
+	set_container_image(
+		&time_digits_images[3],
+		RESOURCE_ID_NUMERAL[(display_min%10)+10], // + 10 to catch the right ressources
+		GPoint(XS[1], YS[1]));
 }
 
 unsigned short get_display_hour(unsigned short hour) {
@@ -93,15 +102,14 @@ unsigned short get_display_hour(unsigned short hour) {
   return display_hour ? display_hour : 12;
 }
 
-void update_display(PblTm *current_time) {
-  // TODO: Only update changed values?
+void update_display(PblTm *current_time, bool bInit) {
   unsigned short display_hour = get_display_hour(current_time->tm_hour);
-  set_time(display_hour, current_time->tm_min);
+  set_time(display_hour, current_time->tm_min,bInit);
 }
 
 void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t) {
   (void)ctx;
-  update_display(t->tick_time);
+  update_display(t->tick_time,false);
 }
 
 void handle_init(AppContextRef ctx) {
@@ -119,7 +127,7 @@ void handle_init(AppContextRef ctx) {
   // avoid a blank screen on watch start
   PblTm tick_time;
   get_time(&tick_time);
-  update_display(&tick_time);
+  update_display(&tick_time, true);
 }
 
 void handle_deinit(AppContextRef ctx) {
