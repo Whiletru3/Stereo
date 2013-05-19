@@ -5,7 +5,11 @@
     "type": "png",
     "defName": "BACKGROUND",
     "file": "images/background.png"
-  }, {
+	}, {
+      "type":"png",
+      "defName":"IMAGE_MENU_ICON",
+      "file":"images/stereo_logo.png"
+    }, {
       "type": "png",
       "defName": "NUMERAL_0",
       "file": "images/0.png"
